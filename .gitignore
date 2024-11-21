@@ -117,3 +117,6 @@ venv.bak/
 dmypy.json
 .bak
 
+# models
+pyramid_flow_model
+

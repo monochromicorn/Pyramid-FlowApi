@@ -28,9 +28,10 @@ tiktoken
 jsonlines
 tensorboardX
 
-# Added dependencies for app_api.py
-fastapi>=0.95.0
-uvicorn>=0.22.0
-celery>=5.3.4
-huggingface_hub
+# Additional dependencies for the API and asynchronous processing
+fastapi
+uvicorn
+celery
+redis
 requests
+pydantic

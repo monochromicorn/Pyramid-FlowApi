@@ -1,3 +1,56 @@
+
+# This repo implements API end points so that Pyramid Flow can be called by other projects through http.
+
+This repo implements an API that allows other applications to call it with http request.
+
+## Instructions to Run the Application
+
+Create a virtual environment and install dependencies.
+```
+python3 -m venv venv
+source venv/bin/activate
+pip install gradio
+pip install -r requirements.txt
+```
+## Run Honcho to Start all the Services
+
+```
+honcho start
+```
+
+You may may get an error with a line mentioning `timm`
+```
+ValueError: mutable default <class 'timm.models.maxxvit.MaxxVitConvCfg'> for field conv_cfg is not allowed: use default_factory
+```
+
+This error caused by a default value in the timm library being a mutable object, which is not allowed with dataclass in Python 3.12. This is a known issue with some libraries that were written before strict enforcement of this rule in Python 3.12.
+
+This issue might be resolved in a newer version of the timm library. Run the following command to update:
+```
+pip install --upgrade timm
+```
+
+## Or Run the Redis, Celery and Web Server in seperate tabs
+
+Start Redis Server
+```
+redis-server
+```
+
+Start the Celery Worker
+```
+# In a new terminal window:
+./start_celery_worker.sh
+```
+
+Run the FastAPI Application
+```
+# In a new terminal window:
+uvicorn app_api:app --host 0.0.0.0 --port 8000
+```
+
+# ORIGINAL PYRAMID FLOW README BELOW
+
 <div align="center">
 
 # ⚡️Pyramid Flow⚡️

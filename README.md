@@ -18,18 +18,6 @@ pip install -r requirements.txt
 honcho start
 ```
 
-You may may get an error with a line mentioning `timm`
-```
-ValueError: mutable default <class 'timm.models.maxxvit.MaxxVitConvCfg'> for field conv_cfg is not allowed: use default_factory
-```
-
-This error caused by a default value in the timm library being a mutable object, which is not allowed with dataclass in Python 3.12. This is a known issue with some libraries that were written before strict enforcement of this rule in Python 3.12.
-
-This issue might be resolved in a newer version of the timm library. Run the following command to update:
-```
-pip install --upgrade timm
-```
-
 ## Or Run the Redis, Celery and Web Server in seperate tabs
 
 Start Redis Server
@@ -48,6 +36,101 @@ Run the FastAPI Application
 # In a new terminal window:
 uvicorn app_api:app --host 0.0.0.0 --port 8000
 ```
+
+## How to Use the API
+
+### 1. Initiate Text-to-Video Generation
+
+Send a **POST** request to `/text_to_video` with the required parameters.
+
+#### Request Body
+```json
+{
+  "prompt": "A cat playing piano",
+  "temp": 16,
+  "guidance_scale": 9.0,
+  "video_guidance_scale": 5.0,
+  "resolution": "384p",  // Options: "384p" or "768p"
+  "seed": 0,  // Set to 0 for random seed
+  "webhook_url": "http://your-webhook-url.com/notify"  // Optional
+}
+```
+
+#### Response
+```json
+{
+  "job_id": "<task_id>"
+}
+```
+
+---
+
+### 2. Initiate Image-to-Video Generation
+
+Send a **POST** request to `/image_to_video` with the required parameters.
+
+#### Request Body
+```json
+{
+  "input_image": "<base64-encoded input image>",
+  "prompt": "A scenic view of mountains during sunset",
+  "temp": 16,
+  "video_guidance_scale": 4.0,
+  "resolution": "384p",  // Options: "384p" or "768p"
+  "seed": 0,  // Set to 0 for random seed
+  "webhook_url": "http://your-webhook-url.com/notify"  // Optional
+}
+```
+
+#### Response
+```json
+{
+  "job_id": "<task_id>"
+}
+```
+
+---
+
+### 3. Check Task Status
+
+Send a **GET** request to `/status/{job_id}` to retrieve the current status of the task.
+
+#### Response
+```json
+{
+  "status": "PENDING"  // Or "STARTED", "SUCCESS", "FAILURE"
+}
+```
+
+---
+
+### 4. Retrieve Result
+
+Once the status is **"SUCCESS"**, send a **GET** request to `/result/{job_id}`.
+
+#### Response
+```json
+{
+  "video": "<base64-encoded video>",
+  "seed": 123456789  // The seed used for video generation
+}
+```
+
+---
+
+### 5. Webhook Notification
+
+If you provided a `webhook_url` in your request, the server will send a POST request to that URL with the generated video once the task is complete.
+
+#### Webhook Payload
+```json
+{
+  "video": "<base64-encoded video>",
+  "seed": 123456789
+}
+```
+
+The webhook functionality is handled by the Celery task functions (`generate_text_to_video_task` and `generate_image_to_video_task`). If a `webhook_url` is provided in the request, the server will notify the given URL with the result.
 
 # ORIGINAL PYRAMID FLOW README BELOW
 
